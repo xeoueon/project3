@@ -72,6 +72,10 @@
             <!-- 제목 입력 -->
             <input type="text" id="blogsubject" name="blogsubject" placeholder="제목을 입력하세요...">
             
+            <!-- 대표사진을 저장할 hidden input -->
+    		<input type="hidden" id="blogimage1" name="blogimage1">
+            
+            
             <!-- 내용 입력 (Summernote) -->
             <textarea id="blogcontent" name="blogcontent"></textarea>
             
@@ -97,9 +101,38 @@
                         $('.note-editable').css({
                             'line-height': '1.0'    // 줄간격
                         });
-                    }
+                    },
+	                onImageUpload: function(files) {
+	                    uploadImage(files[0]);  // 첫 번째 파일만 업로드
+	                }
                 }
             });
+            
+            // 이미지 업로드 함수
+            function uploadImage(file) {
+                let formData = new FormData();
+                formData.append("img", file);
+
+                $.ajax({
+                    url: "/blogboard/uploadImage",
+                    type: "POST",
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    success: function(response) {
+                        // Summernote에 이미지 삽입
+                        $('#blogcontent').summernote('insertImage', response.url);
+                        
+                        // 첫 번째 이미지라면 대표사진으로 설정
+                        if (!$('#blogimage1').val()) {
+                            $('#blogimage1').val(response.fileName);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("이미지 업로드 실패:", error);
+                    }
+                });
+            }
 
             // 툴바를 별도 컨테이너에 추가
             //$('.note-toolbar').appendTo('#summernote-toolbar');
@@ -107,6 +140,7 @@
          	// "다시작성" 버튼 클릭 시 Summernote 내용 초기화
 	            $('#resetBtn').click(function() {
 	                $('#blogcontent').summernote('reset');  // Summernote 내용 초기화
+	                $('#blogimage1').val('');
 	                $('.note-editable').css({
 	                    'line-height': '1.0'    // 초기화 시 줄간격
 	                });

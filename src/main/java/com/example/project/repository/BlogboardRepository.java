@@ -14,7 +14,7 @@ public interface BlogboardRepository extends JpaRepository<Blogboard, Integer> {
 	@Query(value = "select * from "
 			+ "(select rownum rn, tt.* from "
 			+ "(select * from blogboard order by seq desc) tt) "
-			+ "where rn >= :startNum and rn <= :endNum;", nativeQuery = true)
+			+ "where rn >= :startNum and rn <= :endNum", nativeQuery = true)
 	List<Blogboard> findByStartnumAndEndnum(@Param("startNum") int startNum,
 										    @Param("endNum") int endNum);	
 }
